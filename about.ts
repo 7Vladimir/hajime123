@@ -1,55 +1,50 @@
 const http = require('http')
 const fs = require('fs')
+const path = require('path')
 
-console.log('server started et : http://localhost:3000/')
-http.createServer((req,res) => {
-    if (req.url==='/') 
-fs.readFile(process.cwd() + '/index.html', 'utf8', (error,data)=>{
-      if (error)  throw  error
-             res.writeHead(200,{'Content-Type':'text/html'})
-                  res.end(data)
-}); else
-    if (req.url==='/index.html') 
-fs.readFile(process.cwd() + '/index.html', 'utf8', (error,data)=>{
-      if (error)  throw  error
-             res.writeHead(200,{'Content-Type':'text/html'})
-                  res.end(data)
-})
-else
-if (req.url==='/agu') 
-            fs.readFile(process.cwd() + '/Agu/agu.html', 'utf8', (error , data)=>{
-                  if (error)  throw  error
-                         res.writeHead(200,{'Content-Type':'text/html'})
-                              res.end(data)
-})
-else
-if (req.url==='/Agu/core/template/css/style4agu.css') 
-fs.readFile(process.cwd() + '/Agu/core/template/css/style4agu.css', 'utf8', (error,data)=>{
-    if (error)  throw  error
-          res.writeHead(200,{'Content-Type':'text/css'})
-        res.end(data)
-})
+console.log('http://localhost:3000/')
+http.createServer((req,res) => { 
+  
+    if (req.url === '/') req.url = '/index.html'
+    
+    let eName = path.extname(req.url)
+    let cType = 'text/html' 
 
-//___________________________________________________________________
-else  if(req.url === '/Agu/core/template/img/img1.jpg')
-    fs.readFile(process.cwd() + '/Agu/core/template/img/img1.jpg',(error , data) =>{
-        if (error) throw error
-            res.writeHead(200,{'Content-Type':'text/jpg'})
-            res.end(data)
+    switch(eName) {
+        case '.html':
+            cType = 'text/html';
+        break;
+        case '.css':
+            cType = 'text/css';
+        break;
+        case '.png':
+            cType = 'image/png';
+        break;
+        case '.jpg':
+            cType = 'image/jpeg';
+        break;     
+        case '.webp':
+            cType = 'image/webp'
+        break;
+        default: 
+            cType = 'text/html';
+        break; 
+    }
+    
+    fs.readFile(process.cwd() + req.url, (err, data) => {
+
+        if (err) {
+            fs.readFile(process.cwd() + '/404.html', (error, content) => {
+                if (error) throw error
+                    res.writeHead(404, { 'Content-Type': cType });
+                    res.end(content, 'utf-8');
+            });
+        }    
+        
+        else {
+            res.writeHead(200, {'Content-Type': cType})
+            res.end(data, 'utf-8')
+        }
+        
     })
-    else  if(req.url === '/Agu/core/template/img/123.png')
-    fs.readFile(process.cwd() + '/Agu/core/template/img/123.png',(error , data) =>{
-        if (error) throw error
-            res.writeHead(200,{'Content-Type':'text/png'})
-            res.end(data)
-    })
-else 
-
-fs.readFile(process.cwd() + '/404.html', 'utf8', (error , data) =>{
-    if (error)  throw  error
-    res.writeHead(200,{'Content-Type':'text/html'})
-         res.end(data)
-})
-
-}).listen(3000)
-
+}).listen(3000);
